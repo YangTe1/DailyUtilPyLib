@@ -1,9 +1,11 @@
 from fake_useragent import UserAgent
+from utils.logger_utils import get_logger
 import requests
 import random
 import time
 
 s = requests.Session()
+logger = get_logger("http")
 
 
 DP_PROXIES = [
@@ -106,3 +108,34 @@ def fetch(url, retry=0, version="列表页"):
             print("着重休息会")
             time.sleep(2)
             return fetch(url, retry=retry + 1, version=version)
+
+
+def simple_fetch(url, retry=0, func=None):
+    ss = requests.Session()
+    try:
+        res = ss.get(url, timeout=TIMEOUT)
+        if res.status_code != 200:
+            logger.info(res.status_code)
+            raise Exception
+        res.encoding = res.apparent_encoding
+        if func:
+            if func(res.text):
+                pass
+            else:
+                raise Exception
+        return res
+    except (requests.exceptions.RequestException,
+            requests.exceptions.ProxyError) as e:
+        logger.warning(e)
+        if retry <= 3:
+            print("休息会")
+            time.sleep(2)
+            return simple_fetch(url, retry=retry + 1, func=func)
+            # raise
+    except Exception as e:
+        if e:
+            logger.warning(e)
+        if retry <= 3:
+            print("着重休息会")
+            time.sleep(2)
+            return simple_fetch(url, retry=retry + 1, func=func)
