@@ -1,5 +1,5 @@
-from commons.common_params import AMAP_AK
-from utils.http_utils import simple_fetch
+from dailyutilpylib.commons.common_params import AMAP_AK
+from dailyutilpylib.utils.http_utils import simple_fetch
 import json
 
 
